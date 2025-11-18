@@ -1,14 +1,23 @@
 import User from "../models/user.js"
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from '../utils/generateTokens.js'
+import Joi from 'joi'
+import _ from 'lodash'
 
 const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        const exists = await User.findOne({ email })
-        if (exists) return res.status(400).json({ message: "Email already exists" });
+        const schema = Joi.object({
+            name: Joi.string().min(3).max(30).required(),
+            userId: Joi.string().alphanum().min(3).max(30).required(),
+            password: Joi.string().required()
+        })
+        const  { error, value } = schema.validate(req.body);
+        if(error) return res.status(400).json({message: error.details[0].message})
+        const { name, userId, password } = value
+        const exists = await User.findOne({ userId })
+        if (exists) return res.status(400).json({ message: "UserId already exists" });
         const hashedPassword = await bcrypt.hash(password, 10)
-        await User.create({ name, email, password: hashedPassword })
+        await User.create({ name, userId, password: hashedPassword })
         res.json({ message: "User registered successfully" })
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -17,10 +26,15 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { name, password } = req.body;
-        const user = await User.findOne({ name })
+        const schema = Joi.object({
+            userId: Joi.string().alphanum().min(3).max(30).required(),
+            password: Joi.string().required()
+        })
+        const  { error, value } = schema.validate(req.body);
+        if(error) return res.status(400).json({message: error.details[0].message})
+        const { userId, password } = value;
+        const user = await User.findOne({ userId }).select("-__v");
         if (!user) return res.status(404).json({ message: "User not found" });
-        if (user.isBlocked) return res.status(403).json({ message: "User is blocked" })
         const match = await bcrypt.compare(password, user.password)
         if (!match) return res.status(401).json({ message: "Invalid password" })
 
@@ -32,9 +46,8 @@ const login = async (req, res) => {
             secure: true,
             sameSite: "none"
         })
-
-        const { _id, email, role, isBlocked } = user
-        res.json({ accessToken, user: { _id, name: user.name, email, role, isBlocked } })
+        const {_id, name, createdAt, updatedAt} = user;
+        res.json({ accessToken, user: { _id, name, userId: user.userId, createdAt, updatedAt } })
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
