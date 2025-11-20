@@ -25,7 +25,7 @@ const getMessages = async (req, res) => {
     try{
         const {page, limit}  = req.query
         const skip = (page - 1) * limit 
-        const messages = await Messages.find().sort().skip(skip).limit(limit)
+        const messages = await Messages.find().sort({createdAt:-1}).skip(skip).limit(limit)
         const totalCount = await Messages.find().countDocuments()
         res.json({totalCount, messages })
     } catch(error) {
