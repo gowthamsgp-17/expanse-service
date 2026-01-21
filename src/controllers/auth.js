@@ -5,10 +5,11 @@ import Joi from 'joi'
 import _ from 'lodash'
 
 const register = async (req, res) => {
+    console.log('req.body', req.body)
     try {
         const schema = Joi.object({
             name: Joi.string().min(3).max(30).required(),
-            userId: Joi.string().alphanum().min(3).max(30).required(),
+            userId: Joi.string().email().min(3).max(30).required(),
             password: Joi.string().required()
         })
         const  { error, value } = schema.validate(req.body);
@@ -20,6 +21,7 @@ const register = async (req, res) => {
         await User.create({ name, userId, password: hashedPassword })
         res.json({ message: "User registered successfully" })
     } catch (error) {
+        console.log(error.message)
         res.status(500).json({ message: error.message })
     }
 }
@@ -27,7 +29,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try {
         const schema = Joi.object({
-            userId: Joi.string().alphanum().min(3).max(30).required(),
+            userId: Joi.string().min(3).max(30).required(),
             password: Joi.string().required()
         })
         const  { error, value } = schema.validate(req.body);
