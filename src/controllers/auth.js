@@ -55,4 +55,9 @@ const login = async (req, res) => {
     }
 }
 
-export { register, login }
+const getUsersList = async (_, res) => {
+    const usersList = await User.find()
+    res.json({usersList})
+}
+
+export { register, login, getUsersList }

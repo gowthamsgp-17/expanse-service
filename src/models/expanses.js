@@ -12,7 +12,15 @@ const expanseSchema = new mongoose.Schema({
     {_id: false}
     ],
     createdMonth: String,
-    total: Number
+    groupExpense: Boolean,
+    groupName: String,
+    total: Number,
+    createdBy: {
+      type: String,
+      ref: "User",
+      required: true
+    }
+
 }, { timestamps: true })
 
 export default mongoose.model("Expanses", expanseSchema)

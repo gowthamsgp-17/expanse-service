@@ -2,7 +2,6 @@ import Expanses from '../models/expanses.js'
 import Joi from 'joi'
 
 const expanseList = async (req, res) => {
-  console.log('req.body', req.body)
   const schema = Joi.object({
     expanses: Joi.array().items(
         Joi.object({
@@ -15,10 +14,13 @@ const expanseList = async (req, res) => {
       )
       .required(),
       createdMonth: Joi.string().required(),
+      groupExpense: Joi.boolean().required(),
+      groupName: Joi.string().optional(),
       total: Joi.number().required()
   }); 
 
   const { error, value } = schema.validate(req.body)
+  console.log('req.body.groupName', value.groupName)
 
   if (error) {
     return res.status(400).json({
@@ -30,15 +32,24 @@ const expanseList = async (req, res) => {
   const doc = await Expanses.create({
     expanses: value.expanses,
     total: value.total,
-    createdMonth: value.createdMonth
+    createdMonth: value.createdMonth,
+    groupExpense: value.groupExpense,
+    groupName:value.groupName,
+    createdBy: req?.user?.userId
   });
 
   res.status(201).json(doc);
 };
 
-const fetchExpanses = async (_, res) => {
-   const expanses = await Expanses.find()
-   res.status(200).json(expanses);
+const fetchExpanses = async (req, res) => {
+  const expenses = await Expanses.find({createdBy: req.user.userId, groupExpense: req.query.isFromGroup})
+   res.status(200).json(expenses);
 }
 
-export { expanseList, fetchExpanses }
+const fetchExpensesByGroup = async (req, res) => {
+    console.log('req.query', req.query)
+    const expenses = await Expanses.find({createdBy: req.query.createdBy, groupName: req.query.groupName})
+    res.status(200).json(expenses);
+}
+
+export { expanseList, fetchExpanses, fetchExpensesByGroup }
