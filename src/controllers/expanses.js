@@ -9,7 +9,7 @@ const expanseList = async (req, res) => {
           name: Joi.string().required(),
           amount: Joi.number().required(),
           date: Joi.date().required(),
-          description: Joi.string().allow("").optional(),
+          description: Joi.string().allow("").optional()
         })
       )
       .required(),

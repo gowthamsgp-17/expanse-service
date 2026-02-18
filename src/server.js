@@ -1,7 +1,6 @@
 import express from 'express'
 import authRoutes from './routes/auth.js'
 import userRoutes from './routes/user.js'
-import messageRoutes from './routes/messages.js'
 import expenseRoutes from './routes/expanses.js'
 import groupRoutes from './routes/groups.js'
 import connect from './config/db.js'
@@ -18,7 +17,6 @@ app.use(cors())
 
 app.use('/auth', authRoutes)
 app.use('/expanses', userRoutes)
-app.use('/api/v1', messageRoutes)
 app.use('/api/v1', expenseRoutes)
 app.use('/groups', groupRoutes)
 
