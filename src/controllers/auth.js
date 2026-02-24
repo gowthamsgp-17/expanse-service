@@ -15,8 +15,10 @@ const register = async (req, res) => {
         const  { error, value } = schema.validate(req.body);
         if(error) return res.status(400).json({message: error.details[0].message})
         const { name, userId, password } = value
-        const exists = await User.findOne({ userId })
-        if (exists) return res.status(400).json({ message: "UserId already exists" });
+        const existsUserId = await User.findOne({ userId })
+        const existsUserName = await User.findOne({ name })
+        if (existsUserId) return res.status(400).json({ message: "UserId already exists"});
+        if (existsUserName) return res.status(400).json({ message: "User Name already exists"});
         const hashedPassword = await bcrypt.hash(password, 10)
         await User.create({ name, userId, password: hashedPassword })
         res.json({ message: "User registered successfully" })
@@ -56,7 +58,7 @@ const login = async (req, res) => {
 }
 
 const getUsersList = async (_, res) => {
-    const usersList = await User.find()
+    const usersList = await User.find({}, {name:1, userId:1})
     res.json({usersList})
 }
 

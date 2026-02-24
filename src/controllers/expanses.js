@@ -48,7 +48,14 @@ const fetchExpanses = async (req, res) => {
 
 const fetchExpensesByGroup = async (req, res) => {
     console.log('req.query', req.query)
-    const expenses = await Expanses.find({createdBy: req.query.createdBy, groupName: req.query.groupName})
+    let expenses
+    if(req.query.groupName && req.query.createdBy){
+      expenses = await Expanses.find({createdBy: req.query.createdBy, groupName: req.query.groupName})
+    } else if(req.query.groupName){
+      expenses = await Expanses.find({groupName: req.query.groupName})
+    } else {
+      expenses =[]
+    }
     res.status(200).json(expenses);
 }
 
