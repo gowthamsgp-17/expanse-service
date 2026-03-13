@@ -58,5 +58,19 @@ const fetchExpensesByGroup = async (req, res) => {
     }
     res.status(200).json(expenses);
 }
+const deleteRecords = async (req, res) =>{
+  console.log('req.body', req.body)
+  let deletedData
+  const {createdMonth, createdBy, isFromGroup = false, groupName = ''} = req.body
+    if(createdMonth && createdBy && isFromGroup){
+       deletedData = await Expanses.deleteMany({createdBy, createdMonth, groupExpense: isFromGroup})
+    } else if(createdMonth && createdBy && groupName) {
+      deletedData = await Expanses.deleteMany({createdBy, createdMonth, groupName})
+    } else {
+      deletedData = await Expanses.deleteMany({createdBy, createdMonth})
+    }
+  if(deletedData.deletedCount) 
+    res.status(200).json(`Records Deleted Successfully!, deletedCount ==> ${deletedData.deletedCount}`)
+}
 
-export { expanseList, fetchExpanses, fetchExpensesByGroup }
+export { expanseList, fetchExpanses, fetchExpensesByGroup, deleteRecords }
